@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Inspired by https://github.com/ddollar/heroku-buildpack-multi/blob/master/bin/compile
+# executed from the Clojure buildpack so retains its environment - but thats a hack...
+
+echo "{}" > $BUILD_DIR/package.json # required to detect node framework
+BUILDPACK="https://github.com/heroku/heroku-buildpack-nodejs.git"
+dir=$(mktemp -t buildpackXXXXX)
+url=${BUILDPACK%#*}
+rm -rf $dir
+echo "=====> Downloading Buildpack: $url"
+git clone $url $dir >/dev/null 2>&1
+cd $dir
+chmod -f +x $dir/bin/{detect,compile,release} || true
+framework=$($dir/bin/detect $BUILD_DIR)
+echo "=====> Using Framework: $framework"
+$dir/bin/compile $BUILD_DIR $CACHE_DIR $ENV_DIR
+
+# check if the buildpack left behind an environment for subsequent ones
+if [ -e $dir/export ]; then
+    source $dir/export
+fi
+
+if [ -x $dir/bin/release ]; then
+    $dir/bin/release $1 > $1/last_pack_release.out
+fi
+
+echo "=====> ClojureScript with npm:"
+cd $BUILD_DIR
+rm $BUILD_DIR/package.json
+lein with-profile prod do deps, compile
