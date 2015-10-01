@@ -16,7 +16,10 @@
 
 .card table {
     margin: 1em;
-    font-size: 1em;
+}
+
+.card tr {
+    font-size: 0.67em;
 }
 
 .card th {

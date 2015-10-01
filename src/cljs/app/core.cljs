@@ -14,14 +14,6 @@
 
 (defonce devices-var (atom {}))
 
-(defn track-devices []
-  (go-loop []
-    (when-let [val (<! (:in-chan (pubnub/tunnel)))]
-      (reset! devices-var
-              (update @devices-var (:id val) (fn [_] val)))
-      (println ">>>>" val)
-      (recur))))
-
 (defn emulate-devices [n]
   (go-loop []
     (pubnub/bidir-send (pubnub/tunnel)
@@ -30,10 +22,24 @@
     (<! (timeout (* (rand-int 3) 1000)))
     (recur)))
 
+(defn guard-devices [alarm]
+  (go-loop []
+    (when alarm
+      (println "ALARM!"))
+    (<! (timeout (* 10 1000)))
+    (recur)))
+
+(defn track-devices []
+  (go-loop []
+    (when-let [val (<! (:in-chan (pubnub/tunnel)))]
+      (reset! devices-var
+              (update @devices-var (:id val) (fn [_] val)))
+      (println ">>>>" val)
+      (recur))))
+
 (defn monitor-devices [& {:keys [alarm]}]
   (emulate-devices 12)
-  (when alarm
-    (println "ALARM!"))
+  (guard-devices alarm)
   (track-devices))
 
 (defn activate []
