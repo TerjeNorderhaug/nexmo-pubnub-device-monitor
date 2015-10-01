@@ -9,25 +9,18 @@
     opacity: 0.6;
 }
 
-#jokes {
-    font-size: larger;
-    margin-top: 1em;
+.card {
+    margin-top: 0.5em;
+    font-size: 2em;
 }
 
-#jokes .well {
-    font-weight: bold;
-    min-height: 20em;
-    margin-bottom: 1em;
-    position: relative;
+.card table {
+    margin: 1em;
 }
 
-.joke {
-    margin: 0.5em;
-    position: absolute;
-    top: 50%;
-    transform: translate(0, -50%);
+.card th {
+    padding-right: 1em;
 }
-
 
 
 

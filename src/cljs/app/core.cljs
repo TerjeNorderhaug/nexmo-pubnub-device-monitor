@@ -26,10 +26,10 @@
 (defn monitor-devices [& {:keys [alarm]}]
   (go-loop []
     (pubnub/bidir-send (pubnub/tunnel)
-                       {:id (str "device-" (inc (rand-int 4)))
+                       {:id (str "device-" (inc (rand-int 12)))
                         :value (str (pubnub/generate-id))})
     (when alarm
-      (println "ALARM!!!"))
+      (println "ALARM!"))
     (<! (timeout (* 10 1000)))
     (recur))
   (track-devices))
