@@ -18,9 +18,14 @@
     (.set res "Content-Type" "text/html")
     (.send res (<! (static-page)))))
 
+(def instructions-url "https://github.com/TerjeNorderhaug/nexmo-pubnub-device-monitor/blob/master/README.md")
+
 (defn server [port success]
   (doto (express)
     (.get "/" handler)
+    (.get "/testing"
+          (fn [req res]
+            (.redirect res instructions-url)))
     (.use (.static express "resources/public"))
     (.listen port success)))
 
