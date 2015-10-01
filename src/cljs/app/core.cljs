@@ -6,7 +6,6 @@
    [goog.dom :as dom]
    [goog.events :as events]
    [reagent.core :as reagent :refer [atom]]
-   [app.jokes :refer [fresh-jokes]]
    [app.views :refer [monitor-view monitor-page html5]]
    [app.pubnub :as pubnub]))
 

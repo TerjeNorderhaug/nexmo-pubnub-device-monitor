@@ -12,7 +12,8 @@
 (def nexmo-key (env :nexmo-key))
 (def nexmo-secret (env :nexmo-secret))
 
-(.initialize nexmo nexmo-key nexmo-secret "https")
+(defn init-nexmo []
+  (.initialize nexmo nexmo-key nexmo-secret "https"))
 
 (defn get-numbers [account]
   (let [result (chan)]

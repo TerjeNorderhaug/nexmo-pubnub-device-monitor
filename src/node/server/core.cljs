@@ -30,6 +30,7 @@
     (.listen port success)))
 
 (defn -main [& mess]
+;  (nexmo/init-nexmo)
   (monitor-devices :alarm nexmo/send-notification)
   (let [port (or (.-PORT (.-env js/process)) 1337)]
     (server port
