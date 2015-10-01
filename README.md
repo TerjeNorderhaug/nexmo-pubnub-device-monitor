@@ -9,10 +9,12 @@ Check it out at https://nexmo-pubnub.herokuapp.com
 
 ## Deploy to Heroku
 
-To start a server on Heroku:
+To configure and start a server on Heroku:
 
     heroku apps:create
     heroku addons:create pubnub
+    heroku config:set NEXMO_KEY=<nexmo-key>
+    heroku config:set NEXMO_SECRET=<nexmo-secret>
     git push heroku master
     heroku open
 

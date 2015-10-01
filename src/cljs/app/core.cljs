@@ -12,7 +12,7 @@
 (def scripts [{:src "/js/out/app.js"}
               "main_cljs_fn()"])
 
-(defonce devices-var (atom {"testing" {:id "testing" :value "temporary"}}))
+(defonce devices-var (atom {}))
 
 (defn track-devices []
   (go-loop []
@@ -22,15 +22,18 @@
       (println ">>>>" val)
       (recur))))
 
-(defn monitor-devices [& {:keys [alarm]}]
+(defn emulate-devices [n]
   (go-loop []
     (pubnub/bidir-send (pubnub/tunnel)
-                       {:id (str "device-" (inc (rand-int 12)))
+                       {:id (str "device-" (inc (rand-int n)))
                         :value (str (pubnub/generate-id))})
-    (when alarm
-      (println "ALARM!"))
     (<! (timeout (* 10 1000)))
-    (recur))
+    (recur)))
+
+(defn monitor-devices [& {:keys [alarm]}]
+  (emulate-devices 12)
+  (when alarm
+    (println "ALARM!"))
   (track-devices))
 
 (defn activate []

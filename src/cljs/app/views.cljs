@@ -21,7 +21,7 @@
 
 (defsnippet monitor-view "template.html" [:main :.row]
   [devices]
-  {[:.card] (substitute (map device-card devices)) })
+  {[:.card] (substitute (map device-card (sort-by first devices))) })
 
 (defsnippet monitor-page "template.html" [:html]
   [devices & {:keys [scripts]}]

@@ -13,6 +13,8 @@
 (def nexmo-secret (env :nexmo-secret))
 
 (defn init-nexmo []
+  (assert nexmo-key)
+  (assert nexmo-secret)
   (.initialize nexmo nexmo-key nexmo-secret "https"))
 
 (defn get-numbers [account]
