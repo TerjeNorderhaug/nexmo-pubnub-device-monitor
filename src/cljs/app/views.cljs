@@ -12,9 +12,9 @@
   ^{:key (gstring/hashCode (pr-str device))}
   [:div.card.col-xs-12.col-sm-6.col-md-4.col-lg-3
     [:div.panel.panel-primary
-     [:div.panel-heading (str id)]
+     [:div.panel-heading (str id " " (or (:status device) ""))]
      (into [:table]
-           (for [[label value] device]
+           (for [[label value] (dissoc device :id)]
              [:tr
               [:th (name label)]
               [:td (str value)]])) ]])
