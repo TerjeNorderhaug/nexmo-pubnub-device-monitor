@@ -3,7 +3,7 @@
 Clojurescript based reference SPA on Heroku based on Nexmo and Pubnub,
 using node express, bootstrap, reactjs/reagent and Kioo templates,
 demonstrating "isomorphic" clojurescript shared between frontend and backend
-and Figwheel hotloading code changes to both.
+and [Figwheel](https://github.com/bhauman/lein-figwheel) hotloading code changes to both.
 
 Check it out at https://nexmo-pubnub.herokuapp.com
 
