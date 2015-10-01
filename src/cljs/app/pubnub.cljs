@@ -41,10 +41,6 @@
                     :subscribe_key subscribe-key
                     })
 
-;; ## need to block when channel is full!!
-;; ## Also make sure tap doesn't drain the initial stream values
-;; ## Should use different names for the different directions!
-
 (defn pubnub-bidir [pubnub name {:keys [restore backlog] :as options}]
   (.unsubscribe pubnub (clj->js {:channel name}))
   (let [out-chan (chan)
@@ -84,7 +80,7 @@
   (put! (:out-chan bidir) msg))
 
 (defn browser-bidir []
-  (pubnub-bidir (open-pubnub bidir-options) "arrive" {}))
+  (pubnub-bidir (open-pubnub bidir-options) "arrive" {:backlog 300}))
 
 (def tunnel
   (memoize #(pubnub-bidir (open-pubnub bidir-options) "arrive" {})))
