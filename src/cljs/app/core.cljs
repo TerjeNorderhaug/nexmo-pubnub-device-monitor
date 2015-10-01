@@ -27,7 +27,7 @@
     (pubnub/bidir-send (pubnub/tunnel)
                        {:id (str "device-" (inc (rand-int n)))
                         :value (str (pubnub/generate-id))})
-    (<! (timeout (* 10 1000)))
+    (<! (timeout (* (rand-int 3) 1000)))
     (recur)))
 
 (defn monitor-devices [& {:keys [alarm]}]
