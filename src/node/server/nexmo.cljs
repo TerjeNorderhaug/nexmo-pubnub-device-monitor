@@ -7,7 +7,7 @@
    [cljs.nodejs :as nodejs]
    [app.debug :refer [echo]]))
 
-(def nexmo (nodejs/require "easynexmo"))
+(def nexmo (nodejs/require "easynexmo")) ; https://github.com/pvela/nexmo
 
 (def nexmo-key (env :nexmo-key))
 (def nexmo-secret (env :nexmo-secret))
@@ -17,22 +17,24 @@
   (assert nexmo-secret)
   (.initialize nexmo nexmo-key nexmo-secret "https"))
 
-(defn put1! [ch val]
+(defn collect [ch err val]
+  (when err
+    (println "[NEXMO]" err))
   (when val
-    (put! ch val))
+    (put! ch (js->clj val)))
   (close! ch))
 
 (defn get-numbers [account]
   (let [result (chan)]
     (go
-      (.getNumbers account #(put1! result %)))
+      (.getNumbers account (partial collect result)))
     result))
 
 ;; (echo (get-numbers nexmo))
 
 (defn send-notification []
   (let [response (chan)]
-    (.sendTTSMessage nexmo "16502913436" "Shuttle Offline" #js {} #(put1! response %))
+    (.sendTTSMessage nexmo "16502913436" "Shuttle Offline" #js {} (partial collect response))
     response))
 
 ;; (echo (send-notification))
