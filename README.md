@@ -3,12 +3,13 @@
 Clojurescript based reference SPA on Heroku based on Nexmo and Pubnub,
 using node express, bootstrap, reactjs/reagent and Kioo templates,
 demonstrating "isomorphic" clojurescript shared between frontend and backend
-and Figwheel hotloading code changes to both.
+and [Figwheel](https://github.com/bhauman/lein-figwheel) hotloading code changes to both.
 
 Check it out at https://nexmo-pubnub.herokuapp.com
 
 ## Deploy to Heroku
 
+These instructions assumes you already have installed [Leiningen](http://leiningen.org/) and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-command).
 To configure and start a server on Heroku:
 
     heroku apps:create
