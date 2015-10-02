@@ -17,18 +17,22 @@
   (assert nexmo-secret)
   (.initialize nexmo nexmo-key nexmo-secret "https"))
 
+(defn put1! [ch val]
+  (when val
+    (put! ch val))
+  (close! ch))
+
 (defn get-numbers [account]
   (let [result (chan)]
     (go
-      (.getNumbers account
-                   #(do
-                      (if %1
-                        (put! result %1)
-                        (println "[NEXMO] get numbers failed"))
-                      (close! result))))
+      (.getNumbers account #(put1! result %)))
     result))
 
 ;; (echo (get-numbers nexmo))
 
 (defn send-notification []
-  (.sendTTSMessage nexmo "16502913436" "Shuttle Offline" nil nil))
+  (let [response (chan)]
+    (.sendTTSMessage nexmo "16502913436" "Shuttle Offline" #js {} #(put1! response %))
+    response))
+
+;; (echo (send-notification))
