@@ -14,9 +14,11 @@
 (def express (nodejs/require "express"))
 
 (defn handler [req res]
-  (go
-    (.set res "Content-Type" "text/html")
-    (.send res (<! (static-page)))))
+  (if (= "https" (aget (.-headers req) "x-forwarded-proto"))
+    (.redirect res (str "http://" (.get req "Host") (.-url req)))
+    (go
+      (.set res "Content-Type" "text/html")
+      (.send res (<! (static-page))))))
 
 (def instructions-url "https://github.com/TerjeNorderhaug/nexmo-pubnub-device-monitor/blob/master/README.md")
 
