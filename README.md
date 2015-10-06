@@ -16,7 +16,7 @@ The device emulators run in the browser,
 sending randomly created messages on the pubnub channel
 used to monitor devices.
 
-Open a second demo page using the url above, optionally on another computer.
+Open a second demo page using the url above (optionally on another computer).
 Verify that the emulated devices are displayed and updated on the second page.
 You may create additinal devices on this second page, which will show up on
 any other open demo monitor.
