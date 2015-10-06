@@ -1,4 +1,13 @@
-# nexmo-pubnub.cljs
+# Nexmo Pubnub Monitor
+
+Pubnub is commonly used to communicate messages from devices. In case any of the
+devices go offline, it is typically beneficial to become aware of it as soon as
+possible. By installing this project on Heroku, the server will continuously
+monitor your devices and notify via SMS or other Nexmo-provided channels when
+any of your devices stop sending messages on Pubnub. It also provides a web page
+where you optionally can inspect the status of your devices.
+
+## Implementation
 
 Clojurescript based reference SPA on Heroku based on Nexmo and Pubnub,
 using node express, bootstrap, reactjs/reagent and Kioo templates,
@@ -28,7 +37,10 @@ any other open demo monitor.
 
 ## Deploy to Heroku
 
-These instructions assumes you already have installed [Leiningen](http://leiningen.org/) and the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-command).
+These instructions assumes you already have installed
+[Leiningen](http://leiningen.org/) and the
+[Heroku CLI](https://devcenter.heroku.com/articles/heroku-command).
+
 To configure and start a server on Heroku:
 
     heroku apps:create
