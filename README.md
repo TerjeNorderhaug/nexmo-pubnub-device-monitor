@@ -9,6 +9,9 @@ and [Figwheel](https://github.com/bhauman/lein-figwheel) hotloading code changes
 
 Open the demo monitor page at https://nexmo-pubnub.herokuapp.com
 
+Depending on whether the server currently monitors any devices,
+the page may show a panel for each monitored device.
+
 To test out the monitoring and alert functionality,
 create device emulators by clicking the **+Emulate Device**
 button on the navigation bar of the demo page.
