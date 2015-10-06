@@ -7,7 +7,7 @@
    [cljs.nodejs :as nodejs]
    [cljs.core.async :as async :refer [chan close! timeout put!]]
    [reagent.core :as reagent :refer [atom]]
-   [app.core :refer [static-page active-devices monitor-devices track-devices guard-devices]]
+   [app.core :refer [static-page active-devices monitor-devices track-devices]]
    [app.pubnub :as pubnub]
    [server.nexmo :as nexmo]))
 
