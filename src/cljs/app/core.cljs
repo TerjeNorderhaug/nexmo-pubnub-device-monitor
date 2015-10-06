@@ -17,6 +17,8 @@
 
 (secretary/set-config! :prefix "#")
 
+(def expiration (* 60 1000))
+
 (defonce devices-var (atom {}))
 
 (defn monitor-devices [in]
@@ -36,14 +38,27 @@
       (recur))))
 
 (defroute device "/device" []
-  (js/console.log "Emulate Device")
   (emulate-device)
   (aset js/window "location" (str "/#")))
 
-(defn expired-devices [expiration]
+(defn decide-state [device utime]
+  (cond
+    (not (:utime device))
+    nil
+    (< (:utime device)
+       (- utime (* 600 1000)))
+    :expired
+    (< (:utime device)
+       (- utime expiration))
+    :alarm
+    (< (:utime device)
+       (- utime (* 10 1000)))
+    :warn))
+
+(defn expired-devices [expires]
   (filter
    (fn [[_ device]]
-     (< (:utime device) expiration))
+     (< (:utime device) expires))
    @devices-var))
 
 (defn track-devices [& [alarm]]
@@ -53,9 +68,24 @@
         (swap! devices-var
                #(update % (:id val) (fn [_] val)))
         (let [utime (<! (pubnub/fetch-time))]
-          (doseq [[_ device] (expired-devices (- utime (* 60 1000)))]
-            (println "[EXPIRED]" device (- utime (* 60 1000)) (:utime device))))
+          (doseq [[_ device] (expired-devices (- utime expiration))]
+            #_ (alarm)
+            #_ (println "[EXPIRED]" device (- utime expiration) (:utime device))))
         (recur)))))
+
+(defn devices-cursor
+  ([devices utime]
+   (->>
+    devices
+    (map (fn [[id device]]
+           [id (assoc device
+                      :state (decide-state device utime)
+                      :counter (if (and utime (not= 0 utime))
+                                 (quot
+                                  (- utime (:utime device))
+                                  1000))) ]))))
+  ([utime]
+   (devices-cursor @devices-var utime)))
 
 (defn activate []
   (let [el (dom/getElement "main")
@@ -66,26 +96,24 @@
     (go-loop []
       (when-let [u (<! (pubnub/fetch-time))]
         (reset! utime u)
-        (<! (timeout 40))
-        (recur)))
-    (go-loop [devices (<! (fetch-json "/devices"))]
-      (reset! devices-var
-              (into {} (map #(vector (:id %) %)) devices))
-      (reagent/render [#(monitor-view @devices-var @utime)] el)
+        (<! (timeout 300))
+        (recur))
+      (println "[PUBNUB] time stopped"))
+    (go-loop [devices (->> (<! (fetch-json "/devices"))
+                           (map #(vector (:id %) %))
+                           (into {}))]
+      (reset! devices-var devices)
+      (reagent/render [#(monitor-view (devices-cursor @%1 @%2)) devices-var utime] el)
       (track-devices))))
 
-(defn active-devices []
-  (let [out (chan 1)]
-    (go-loop [utime (<! (pubnub/fetch-time))]
-      (->>
-       @devices-var
-       (filter (fn [[id dev]]
-                 [id (> (:utime dev)
-                        (- utime (* 600 1000)))]))
-       (#(or % []))
-       (into {})
-       (put! out)))
-    out))
+(defn active-devices [utime]
+  (->>
+   @devices-var
+   (filter
+    (fn [[id dev]]
+      (not= :expired (decide-state dev utime))))
+   (#(or % []))
+   (into {})))
 
 (defn scripts []
   [{:src "/js/out/app.js"}
@@ -93,11 +121,11 @@
 
 (defn static-page []
   (let [out (chan 1)]
-    (go
+    (go-loop [utime (<! (pubnub/fetch-time))
+              devices (active-devices utime)]
       (put! out
-            (-> (<! (active-devices))
+            (-> (devices-cursor devices utime)
                 (monitor-page
-                 :utime (<! (pubnub/fetch-time))
                  :scripts (scripts))
                 (reagent/render-to-string)
                 (html5))))

@@ -29,7 +29,8 @@
     (.get "/" handler)
     (.get "/devices"
           (fn [req res]
-            (go (.json res (clj->js (map second (<! (active-devices))))))))
+            (go-loop [utime (pubnub/fetch-time)]
+              (.json res (clj->js (map second (active-devices utime)))))))
     (.get "/testing"
           (fn [req res]
             (.redirect res instructions-url)))

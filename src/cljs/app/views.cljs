@@ -9,14 +9,14 @@
    [kioo.reagent :refer [defsnippet deftemplate snippet]]))
 
 (defn counter [device s]
-  (if (<= 0 s 9999)
+  (if (not= :expired (:state device))
     [:span.badge.pull-right
-     (cond
-       (< s 10)
+     (case (:state device)
+       nil
        [:span.glyphicon.glyphicon-ok-circle]
-       (< s 60)
+       :warn
        [:span.glyphicon.glyphicon-exclamation-sign]
-       true
+       :alarm
        [:span.glyphicon.glyphicon-earphone])
      (str " " s) ]))
 
@@ -28,29 +28,23 @@
       [:span.device-label (str (:id device))]
       [counter device (:counter device)]]
      (into [:table.table-striped]
-           (for [[label value] (dissoc device :id :counter)]
+           (for [[label value] (dissoc device :id :counter :state)]
              [:tr
               [:th (name label)]
               [:td (str value)]])) ]])
 
 (defsnippet monitor-view "template.html" [:main :.row]
-  [devices-map utime]
+  [devices-map]
   {[:.card]
    (substitute
     (->> devices-map
          (map second)
          (sort-by :id)
-         (map (fn [device]
-                (assoc device
-                       :counter (if utime
-                                  (quot
-                                   (- utime (:utime device))
-                                   1000)))))
          (map device-card))) })
 
 (defsnippet monitor-page "template.html" [:html]
-  [devices & {:keys [scripts utime]}]
-  {[:main] (content [monitor-view devices utime])
+  [devices & {:keys [scripts]}]
+  {[:main] (content [monitor-view devices])
    [:body] (append
              [:div (for [src scripts]
                      ^{:key (gstring/hashCode (pr-str src))}
