@@ -23,6 +23,9 @@ to limit what is shown in the browser.
 The implementation is highly *isomorphic*: Most of the code is shared between
 the browser and the server. See the /src/cljs directory for the shared code,
 /src/browser for the browser specific and /src/node for the server only code.
+The server uses *react* to generate a static page, while *react* is used in the
+browser to keep the page updated to reflect changes to the status of the
+devices sychronized with the server via pubnub.
 
 ## Demonstration
 
