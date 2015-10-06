@@ -6,7 +6,7 @@
    [cljs.nodejs :as nodejs]
    [cljs.core.async :as async :refer [chan close! timeout put!]]
    [reagent.core :as reagent :refer [atom]]
-   [app.core :refer [static-page monitor-devices track-devices guard-devices]]
+   [app.core :refer [static-page active-devices monitor-devices track-devices guard-devices]]
    [server.nexmo :as nexmo]))
 
 (enable-console-print!)
@@ -23,6 +23,9 @@
 (defn server [port success]
   (doto (express)
     (.get "/" handler)
+    (.get "/devices"
+          (fn [req res]
+            (go (.json res (clj->js (<! (active-devices)))))))
     (.get "/testing"
           (fn [req res]
             (.redirect res instructions-url)))

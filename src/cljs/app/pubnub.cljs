@@ -122,6 +122,3 @@
       (reset! atom-var
               (if f (f @atom-var val) val))
       (recur))))
-
-;; (bidir-send (tunnel) {:id "hello2"})
-;; (echo (:in-chan (tunnel)))

@@ -8,19 +8,17 @@
   (:require-macros
    [kioo.reagent :refer [defsnippet deftemplate snippet]]))
 
-(defn counter [device]
-  (let [s (atom 0)]
-    (js/setInterval #(swap! s inc) 1000)
-    (fn []
-      [:span.badge.pull-right
-       (cond
-         (< @s 10)
-         [:span.glyphicon.glyphicon-ok-circle]
-         (< @s 60)
-         [:span.glyphicon.glyphicon-exclamation-sign]
-         true
-         [:span.glyphicon.glyphicon-earphone])
-       (str " " @s) ] )))
+(defn counter [device s]
+  (if (< s 9999)
+    [:span.badge.pull-right
+     (cond
+       (< s 10)
+       [:span.glyphicon.glyphicon-ok-circle]
+       (< s 60)
+       [:span.glyphicon.glyphicon-exclamation-sign]
+       true
+       [:span.glyphicon.glyphicon-earphone])
+     (str " " s) ]))
 
 (defn device-card [[id device]]
   ^{:key (gstring/hashCode (pr-str device))}
@@ -28,23 +26,33 @@
     [:div.panel.panel-primary
      [:div.panel-heading
       [:span.device-label (str id)]
-      [counter device]]
+      [counter device (:counter device)]]
      (into [:table.table-striped]
-           (for [[label value] (dissoc device :id)]
+           (for [[label value] (dissoc device :id :counter)]
              [:tr
               [:th (name label)]
               [:td (str value)]])) ]])
 
 (defsnippet monitor-view "template.html" [:main :.row]
-  [devices]
-  {[:.card] (substitute (map device-card (sort-by first devices))) })
+  [devices utime]
+  {[:.card]
+   (substitute
+    (map device-card
+         (map (fn [[id service]]
+                [id (assoc service
+                           :counter (if utime
+                                      (quot
+                                       (- utime (:utime service))
+                                       1000)))])
+              (sort-by first devices)))) })
 
 (defsnippet monitor-page "template.html" [:html]
-  [devices & {:keys [scripts]}]
-  {[:main] (content [monitor-view devices])
-   [:body] (append [:div (for [src scripts]
-                           ^{:key (gstring/hashCode (pr-str src))}
-                           [:script src])]) })
+  [devices & {:keys [scripts utime]}]
+  {[:main] (content [monitor-view devices utime])
+   [:body] (append
+             [:div (for [src scripts]
+                     ^{:key (gstring/hashCode (pr-str src))}
+                     [:script src])]) })
 
 (defn html5 [content]
   (str "<!DOCTYPE html>\n" content))

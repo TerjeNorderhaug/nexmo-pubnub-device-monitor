@@ -9,31 +9,27 @@
    [goog.history.EventType :as EventType]
    [reagent.core :as reagent :refer [atom]]
    [secretary.core :as secretary :refer-macros [defroute]]
+   [app.debug :refer [echo]]
+   [app.json :refer [fetch-json]]
    [app.views :refer [monitor-view monitor-page html5]]
    [app.pubnub :as pubnub])
   (:import goog.History))
 
 (secretary/set-config! :prefix "#")
 
-(def scripts [{:src "/js/out/app.js"}
-              "main_cljs_fn()"])
-
 (defonce devices-var (atom {}))
-
-(defn guard-devices [alarm]
-  (go-loop []
-    (when alarm
-      (println "ALARM!"))
-    (<! (timeout (* 10 1000)))
-    (recur)))
 
 (defn track-devices []
   (go-loop []
     (when-let [val (<! (:in-chan (pubnub/tunnel)))]
-      (reset! devices-var
-              (update @devices-var (:id val) (fn [_] val)))
-      (println ">>>>" val)
+      (swap! devices-var
+             #(update % (:id val) (fn [_] val)))
       (recur))))
+
+(defn guard-devices [alarm]
+  (go-loop []
+    (<! (timeout (* 1 1000)))
+    (recur)))
 
 (def devices-pubnub
   {:keepalive 5
@@ -46,7 +42,6 @@
   (let [in (pubnub/subscribe devices-pubnub)]
     (go-loop []
       (when-let [msg (<! in)]
-        (println "[MONITOR]" msg)
         (pubnub/bidir-send (pubnub/tunnel) msg)
         (recur)))))
 
@@ -65,20 +60,50 @@
   (emulate-device)
   (aset js/window "location" (str "/#")))
 
+(let [clock (pubnub/open-pubnub {})]
+  (defn fetch-time []
+    (let [out (chan 1)]
+      (go-loop []
+        (.time clock #(put! out (quot % 10000))))
+      out)))
+
+(defn activate []
+  (let [el (dom/getElement "main")
+        h (History.)
+        utime (atom nil)]
+    (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
+    (doto h (.setEnabled true))
+    (go-loop []
+      (when-let [u (<! (fetch-time))]
+        (reset! utime u)
+        (<! (timeout 40))
+        (recur)))
+    (go-loop [devices (<! (fetch-json "/devices"))]
+      (reset! devices-var devices)
+      (reagent/render [#(monitor-view @devices-var @utime)] el)
+      (track-devices))))
+
+(defn active-devices []
+  (let [out (chan 1)]
+    (go-loop [utime (<! (fetch-time))]
+      (->>
+       @devices-var
+       (filter #(> (:utime %)
+                   (- utime (* 600 1000))))
+       (put! out)))
+    out))
+
+(defn scripts []
+  [{:src "/js/out/app.js"}
+   "main_cljs_fn()"])
+
 (defn static-page []
   (let [out (chan 1)]
     (go
       (put! out
-            (-> @devices-var
-                (monitor-page :scripts scripts)
+            (-> (<! (active-devices))
+                (monitor-page :scripts (scripts))
                 (reagent/render-to-string)
                 (html5))))
     out))
-
-(defn activate []
-  (let [el (dom/getElement "main")
-        h (History.)]
-    (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
-    (doto h (.setEnabled true))
-    (reagent/render [#(monitor-view @devices-var)] el)
-    (track-devices)))
+OB
