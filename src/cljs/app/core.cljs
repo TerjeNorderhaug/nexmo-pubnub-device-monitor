@@ -19,14 +19,6 @@
 
 (defonce devices-var (atom {}))
 
-(defn track-devices [& [alarm]]
-  (let [in (:in-chan (pubnub/tunnel))]
-    (go-loop []
-      (when-let [val (<! in)]
-        (swap! devices-var
-               #(update % (:id val) (fn [_] val)))
-        (recur)))))
-
 (defn monitor-devices [in]
   (go-loop []
     (when-let [msg (<! in)]
@@ -47,6 +39,23 @@
   (js/console.log "Emulate Device")
   (emulate-device)
   (aset js/window "location" (str "/#")))
+
+(defn expired-devices [expiration]
+  (filter
+   (fn [[_ device]]
+     (< (:utime device) expiration))
+   @devices-var))
+
+(defn track-devices [& [alarm]]
+  (let [in (:in-chan (pubnub/tunnel))]
+    (go-loop []
+      (when-let [val (<! in)]
+        (swap! devices-var
+               #(update % (:id val) (fn [_] val)))
+        (let [utime (<! (pubnub/fetch-time))]
+          (doseq [[_ device] (expired-devices (- utime (* 60 1000)))]
+            (println "[EXPIRED]" device (- utime (* 60 1000)) (:utime device))))
+        (recur)))))
 
 (defn activate []
   (let [el (dom/getElement "main")

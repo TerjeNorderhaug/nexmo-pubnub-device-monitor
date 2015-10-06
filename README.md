@@ -18,7 +18,10 @@ In addition to the server monitoring a pubnub channel, the implementation also
 **uses Pubnub internally** to communicate between the server and browser.
 The details about the monitored pubnub channel is shielded from exposure
 to those accessing the web monitor. It would be trivial to filter the messages
-to limit what is shown in the browser.
+to limit what is shown in the browser. The implementation uses
+Clojure's [async](https://github.com/clojure/core.async) channels
+and goroutines internally, in tune with the use of pubnub for
+inter-process communication.
 
 The implementation is highly *isomorphic*: Most of the code is shared between
 the browser and the server. See the /src/cljs directory for the shared code,
