@@ -5,7 +5,21 @@ using node express, bootstrap, reactjs/reagent and Kioo templates,
 demonstrating "isomorphic" clojurescript shared between frontend and backend
 and [Figwheel](https://github.com/bhauman/lein-figwheel) hotloading code changes to both.
 
-Check it out at https://nexmo-pubnub.herokuapp.com
+## Demonstration
+
+Open the demo monitor page at https://nexmo-pubnub.herokuapp.com
+
+To test out the monitoring and alert functionality,
+create device emulators by clicking the **+Emulate Device**
+button on the navigation bar of the demo page.
+The device emulators run in the browser,
+sending randomly created messages on the pubnub channel
+used to monitor devices.
+
+Open a second demo page using the url above, optionally on another computer.
+Verify that the emulated devices are displayed and updated on the second page.
+You may create additinal devices on this second page, which will show up on
+any other open demo monitor.
 
 ## Deploy to Heroku
 
