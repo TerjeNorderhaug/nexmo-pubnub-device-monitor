@@ -25,7 +25,7 @@
     (.get "/" handler)
     (.get "/devices"
           (fn [req res]
-            (go (.json res (clj->js (<! (active-devices)))))))
+            (go (.json res (clj->js (map second (<! (active-devices))))))))
     (.get "/testing"
           (fn [req res]
             (.redirect res instructions-url)))

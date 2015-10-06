@@ -8,6 +8,6 @@
 (defn fetch-json [uri]
   (let [out (chan)]
     (xhr/send uri (fn [e]
-                    (put! out
-                          (-> e .-target .getResponseJson js->clj))))
+                    (put! out (-> e .-target .getResponseJson
+                                  (js->clj :keywordize-keys true)))))
     out))

@@ -79,7 +79,8 @@
         (<! (timeout 40))
         (recur)))
     (go-loop [devices (<! (fetch-json "/devices"))]
-      (reset! devices-var devices)
+      (reset! devices-var
+              (into {} (map #(vector (:id %) %)) devices))
       (reagent/render [#(monitor-view @devices-var @utime)] el)
       (track-devices))))
 
@@ -88,8 +89,11 @@
     (go-loop [utime (<! (fetch-time))]
       (->>
        @devices-var
-       (filter #(> (:utime %)
-                   (- utime (* 600 1000))))
+       (filter (fn [[id dev]]
+                 [id (> (:utime dev)
+                        (- utime (* 600 1000)))]))
+       (#(or % []))
+       (into {})
        (put! out)))
     out))
 
@@ -106,4 +110,3 @@
                 (reagent/render-to-string)
                 (html5))))
     out))
-OB
