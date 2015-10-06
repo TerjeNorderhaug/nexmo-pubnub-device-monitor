@@ -19,31 +19,19 @@
 
 (defonce devices-var (atom {}))
 
-(defn track-devices []
-  (go-loop []
-    (when-let [val (<! (:in-chan (pubnub/tunnel)))]
-      (swap! devices-var
-             #(update % (:id val) (fn [_] val)))
-      (recur))))
-
-(defn guard-devices [alarm]
-  (go-loop []
-    (<! (timeout (* 1 1000)))
-    (recur)))
-
-(def devices-pubnub
-  {:keepalive 5
-   :restore true
-   :ssl true
-   :subscribe_key (env :pubnub-source-key)
-   :channel (env :pubnub-source-channel)})
-
-(defn monitor-devices []
-  (let [in (pubnub/subscribe devices-pubnub)]
+(defn track-devices [& [alarm]]
+  (let [in (:in-chan (pubnub/tunnel))]
     (go-loop []
-      (when-let [msg (<! in)]
-        (pubnub/bidir-send (pubnub/tunnel) msg)
+      (when-let [val (<! in)]
+        (swap! devices-var
+               #(update % (:id val) (fn [_] val)))
         (recur)))))
+
+(defn monitor-devices [in]
+  (go-loop []
+    (when-let [msg (<! in)]
+      (pubnub/bidir-send (pubnub/tunnel) msg)
+      (recur))))
 
 (defn emulate-device []
   (let [name (pubnub/generate-id)]

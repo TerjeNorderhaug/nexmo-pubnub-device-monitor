@@ -9,7 +9,7 @@
    [kioo.reagent :refer [defsnippet deftemplate snippet]]))
 
 (defn counter [device s]
-  (if (< s 9999)
+  (if (<= 0 s 9999)
     [:span.badge.pull-right
      (cond
        (< s 10)
