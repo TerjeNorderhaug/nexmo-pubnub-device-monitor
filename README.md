@@ -20,6 +20,10 @@ The details about the monitored pubnub channel is shielded from exposure
 to those accessing the web monitor. It would be trivial to filter the messages
 to limit what is shown in the browser.
 
+The implementation is highly *isomorphic*: Most of the code is shared between
+the browser and the server. See the /src/cljs directory for the shared code,
+/src/browser for the browser specific and /src/node for the server only code.
+
 ## Demonstration
 
 Open the demo monitor page at https://nexmo-pubnub.herokuapp.com

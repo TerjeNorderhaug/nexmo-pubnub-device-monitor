@@ -59,6 +59,13 @@
   ([{:as params}]
    (subscribe (open-pubnub params) params)))
 
+(let [clock (open-pubnub {})]
+  (defn fetch-time []
+    (let [out (chan 1)]
+      (go-loop []
+        (.time clock #(put! out (quot % 10000))))
+      out)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BIDIRECTIONAL CHANNEL (with browser)
 

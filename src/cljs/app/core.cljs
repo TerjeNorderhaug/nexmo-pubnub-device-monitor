@@ -48,13 +48,6 @@
   (emulate-device)
   (aset js/window "location" (str "/#")))
 
-(let [clock (pubnub/open-pubnub {})]
-  (defn fetch-time []
-    (let [out (chan 1)]
-      (go-loop []
-        (.time clock #(put! out (quot % 10000))))
-      out)))
-
 (defn activate []
   (let [el (dom/getElement "main")
         h (History.)
@@ -62,7 +55,7 @@
     (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
     (doto h (.setEnabled true))
     (go-loop []
-      (when-let [u (<! (fetch-time))]
+      (when-let [u (<! (pubnub/fetch-time))]
         (reset! utime u)
         (<! (timeout 40))
         (recur)))
@@ -74,7 +67,7 @@
 
 (defn active-devices []
   (let [out (chan 1)]
-    (go-loop [utime (<! (fetch-time))]
+    (go-loop [utime (<! (pubnub/fetch-time))]
       (->>
        @devices-var
        (filter (fn [[id dev]]
@@ -94,7 +87,9 @@
     (go
       (put! out
             (-> (<! (active-devices))
-                (monitor-page :scripts (scripts))
+                (monitor-page
+                 :utime (<! (pubnub/fetch-time))
+                 :scripts (scripts))
                 (reagent/render-to-string)
                 (html5))))
     out))
