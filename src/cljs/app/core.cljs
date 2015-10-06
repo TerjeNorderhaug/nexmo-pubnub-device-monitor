@@ -56,7 +56,8 @@
       (pubnub/bidir-send (pubnub/tunnel)
                          {:id name
                           :value (str (pubnub/generate-id))})
-      (<! (timeout (* (rand-int 3) 1000)))
+      (<! (timeout (* (if (zero? (rand-int 5)) (rand-int 90)(rand-int 15))
+                      1000)))
       (recur))))
 
 (defroute device "/device" []

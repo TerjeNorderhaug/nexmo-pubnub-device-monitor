@@ -8,11 +8,27 @@
   (:require-macros
    [kioo.reagent :refer [defsnippet deftemplate snippet]]))
 
+(defn counter [device]
+  (let [s (atom 0)]
+    (js/setInterval #(swap! s inc) 1000)
+    (fn []
+      [:span.badge.pull-right
+       (cond
+         (< @s 10)
+         [:span.glyphicon.glyphicon-ok-circle]
+         (< @s 60)
+         [:span.glyphicon.glyphicon-exclamation-sign]
+         true
+         [:span.glyphicon.glyphicon-earphone])
+       (str " " @s) ] )))
+
 (defn device-card [[id device]]
   ^{:key (gstring/hashCode (pr-str device))}
   [:div.card.col-xs-12.col-sm-6.col-md-4.col-lg-3
     [:div.panel.panel-primary
-     [:div.panel-heading (str id " " (or (:status device) ""))]
+     [:div.panel-heading
+      [:span.device-label (str id)]
+      [counter device]]
      (into [:table.table-striped]
            (for [[label value] (dissoc device :id)]
              [:tr

@@ -5,8 +5,8 @@
     right: 0;
     border: 0;
     z-index: 100;
-    width: 15em;
-    opacity: 0.6;
+    width: 9em;
+    opacity: 0.5;
 }
 
 .card {
@@ -14,12 +14,23 @@
     font-size: 2em;
 }
 
+.panel-heading .device-label {
+    text-overflow: ellipsis;
+}
+
+.card .badge {
+    font-size: 0.8em;
+    margin-left: 0.3em;
+}
+
 .card table {
     margin-top: 0.5em;
+    width: 100%;
 }
 
 .card tr {
     font-size: 0.6em;
+    width: 100%;
 }
 
 .card th {
@@ -31,15 +42,27 @@
     max-width: 6em;
     word-break: normal;
     overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .card td {
     padding-left: 0.5em;
-    // vertical-align: top;
 }
 
 .panel {
-    min-height: 14em;
+    min-height: 16em;
     overflow: hidden;
 }
 
+.card .glyphicon-earphone {
+    color: salmon;
+}
+
+.navbar-brand  {
+    font-size: 1.5em;
+}
+
+.navbar-brand .glyphicon {
+    color: orange;
+    margin-right: 0.2em;
+}
