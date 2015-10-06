@@ -1,6 +1,7 @@
 (ns app.core
   (:require-macros
-   [cljs.core.async.macros :refer [go go-loop]])
+   [cljs.core.async.macros :refer [go go-loop]]
+   [app.env :refer [env]])
   (:require
    [cljs.core.async :as async :refer [chan close! timeout put!]]
    [goog.dom :as dom]
@@ -19,15 +20,6 @@
 
 (defonce devices-var (atom {}))
 
-(defn emulate-device []
-  (let [name (pubnub/generate-id)]
-    (go-loop []
-      (pubnub/bidir-send (pubnub/tunnel)
-                         {:id name
-                          :value (str (pubnub/generate-id))})
-      (<! (timeout (* (rand-int 3) 1000)))
-      (recur))))
-
 (defn guard-devices [alarm]
   (go-loop []
     (when alarm
@@ -43,9 +35,29 @@
       (println ">>>>" val)
       (recur))))
 
-(defn monitor-devices [& {:keys [alarm]}]
-  (guard-devices alarm)
-  (track-devices))
+(def devices-pubnub
+  {:keepalive 5
+   :restore true
+   :ssl true
+   :subscribe_key (env :pubnub-source-key)
+   :channel (env :pubnub-source-channel)})
+
+(defn monitor-devices []
+  (let [in (pubnub/subscribe devices-pubnub)]
+    (go-loop []
+      (when-let [msg (<! in)]
+        (println "[MONITOR]" msg)
+        (pubnub/bidir-send (pubnub/tunnel) msg)
+        (recur)))))
+
+(defn emulate-device []
+  (let [name (pubnub/generate-id)]
+    (go-loop []
+      (pubnub/bidir-send (pubnub/tunnel)
+                         {:id name
+                          :value (str (pubnub/generate-id))})
+      (<! (timeout (* (rand-int 3) 1000)))
+      (recur))))
 
 (defroute device "/device" []
   (js/console.log "Emulate Device")

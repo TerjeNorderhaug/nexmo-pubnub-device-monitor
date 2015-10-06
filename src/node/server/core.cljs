@@ -6,7 +6,7 @@
    [cljs.nodejs :as nodejs]
    [cljs.core.async :as async :refer [chan close! timeout put!]]
    [reagent.core :as reagent :refer [atom]]
-   [app.core :refer [static-page monitor-devices]]
+   [app.core :refer [static-page monitor-devices track-devices guard-devices]]
    [server.nexmo :as nexmo]))
 
 (enable-console-print!)
@@ -31,7 +31,9 @@
 
 (defn -main [& mess]
   (nexmo/init-nexmo)
-  (monitor-devices :alarm nexmo/send-notification)
+  (monitor-devices)
+  (track-devices)
+  (guard-devices nexmo/send-notification)
   (let [port (or (.-PORT (.-env js/process)) 1337)]
     (server port
             #(println (str "Server running at http://127.0.0.1:" port "/")))))

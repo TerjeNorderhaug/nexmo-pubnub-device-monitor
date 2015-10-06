@@ -23,10 +23,41 @@
   (println "[PUBNUB] Disconnected")
   (reset! connected false))
 
+(defn on-message [msg]
+  (println "[PUBNUB] Message: " msg))
+
+(defn on-error [msg]
+  (println "[PUBNUB] Error: " (.-error msg)))
+
 (defn generate-id []
   (-> (.random js/Math)
       (.toString 36)
       (.substring 7)))
+
+(def subscribe-defaults
+  {:message on-message
+   :connect on-connect
+   :reconnect on-connect
+   :disconnect on-disconnect
+   :error on-error})
+
+(defn subscribe
+  ([pubnub {:as params}]
+   (let [ch (chan)
+         on-message (fn [message [_ time-token] channel]
+                      (put! ch
+                            (assoc
+                             (js->clj message :keywordize-keys true)
+                             :utime (quot time-token 10000))))]
+     (.subscribe pubnub
+                 (clj->js
+                  (merge
+                   subscribe-defaults
+                   params
+                   {:message on-message})))
+     ch))
+  ([{:as params}]
+   (subscribe (open-pubnub params) params)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BIDIRECTIONAL CHANNEL (with browser)

@@ -41,12 +41,20 @@ These instructions assumes you already have installed
 [Leiningen](http://leiningen.org/) and the
 [Heroku CLI](https://devcenter.heroku.com/articles/heroku-command).
 
-To configure and start a server on Heroku:
+To configure a server on Heroku:
 
     heroku apps:create
     heroku addons:create pubnub
     heroku config:set NEXMO_KEY=<nexmo-key>
     heroku config:set NEXMO_SECRET=<nexmo-secret>
+
+Optionally specify a channel as source for device messages:
+
+    heroku config:set PUBNUB_SOURCE_KEY=<pubnub-key>
+    heroku config:set PUBNUB_SOURCE_CHANNEL=<pubnub-channel>
+
+Start the server:
+
     git push heroku master
     heroku open
 
