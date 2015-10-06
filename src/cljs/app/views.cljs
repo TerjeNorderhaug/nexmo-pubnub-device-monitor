@@ -40,7 +40,6 @@
     (->> devices-map
          (map second)
          (sort-by :id)
-         (#(do (println %) %))
          (map (fn [device]
                 (assoc device
                        :counter (if utime

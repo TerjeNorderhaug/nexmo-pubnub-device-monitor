@@ -14,6 +14,12 @@ using node express, bootstrap, reactjs/reagent and Kioo templates,
 demonstrating "isomorphic" clojurescript shared between frontend and backend
 and [Figwheel](https://github.com/bhauman/lein-figwheel) hotloading code changes to both.
 
+In addition to the server monitoring a pubnub channel, the implementation also
+**uses Pubnub internally** to communicate between the server and browser.
+The details about the monitored pubnub channel is shielded from exposure
+to those accessing the web monitor. It would be trivial to filter the messages
+to limit what is shown in the browser.
+
 ## Demonstration
 
 Open the demo monitor page at https://nexmo-pubnub.herokuapp.com
