@@ -9,8 +9,10 @@ and [Figwheel](https://github.com/bhauman/lein-figwheel) hotloading code changes
 
 Open the demo monitor page at https://nexmo-pubnub.herokuapp.com
 
-Depending on whether the server currently monitors any devices,
-the page may show a panel for each monitored device.
+The page will display a panel for each device that are monitored
+by the server (possibly none). Each panel shows the id of the device
+on top, and the more recent values from the device as transmitted
+in a pubnub message.
 
 To test out the monitoring and alert functionality,
 create device emulators by clicking the **+Emulate Device**
