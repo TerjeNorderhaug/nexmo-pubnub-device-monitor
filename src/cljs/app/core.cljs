@@ -17,7 +17,7 @@
 
 (secretary/set-config! :prefix "#")
 
-(def expiration (* 60 1000))
+(def expiration (* 30 1000))
 
 (defonce devices-var (atom {}))
 
