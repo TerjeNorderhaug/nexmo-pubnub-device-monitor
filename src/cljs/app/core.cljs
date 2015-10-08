@@ -55,23 +55,23 @@
        (- utime (* 10 1000)))
     :warn))
 
-(defn expired-devices [expires]
-  (filter
-   (fn [[_ device]]
-     (< (:utime device) expires))
-   @devices-var))
-
 (defn track-devices [& [alarm]]
   (let [in (:in-chan (pubnub/tunnel))]
-    (go-loop []
-      (when-let [val (<! in)]
+    (go-loop [active-devices {}]
+      (when-let [msg (<! in)]
         (swap! devices-var
-               #(update % (:id val) (fn [_] val)))
-        (let [utime (<! (pubnub/fetch-time))]
-          (doseq [[_ device] (expired-devices (- utime expiration))]
-            #_ (alarm)
-            #_ (println "[EXPIRED]" device (- utime expiration) (:utime device))))
-        (recur)))))
+               #(assoc % (:id msg) msg))
+        (let [utime (<! (pubnub/fetch-time))
+              expires (- utime expiration)
+              expire? #(< % expires)]
+          (doseq [[id recent] active-devices
+                  :when (expire? recent)]
+            #_ (if alarm (alarm))
+            (println "[EXPIRED]" id expires recent))
+          (recur (assoc (apply dissoc active-devices
+                               (remove (comp expire? second)
+                                       active-devices))
+                        (:id msg) utime) ))))))
 
 (defn devices-cursor
   ([devices utime]
