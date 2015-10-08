@@ -66,7 +66,7 @@
               expire? #(< % expires)]
           (doseq [[id recent] active-devices
                   :when (expire? recent)]
-            #_ (if alarm (alarm))
+            (if alarm (alarm))
             (println "[EXPIRED]" id expires recent))
           (recur (assoc (apply dissoc active-devices
                                (remove (comp expire? second)
